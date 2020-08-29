@@ -6,7 +6,7 @@ setup(name='MaxiNet',
       description='Distributed Software Defined Network Emulation',
       long_description="MaxiNet extends the famous Mininet emulation environment to span the emulation across several physical machines. This allows to emulate very large SDN networks.",
       classifiers=[
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
       ],
       keywords='mininet MaxiNet SDN Network OpenFlow openvswitch',
       url='https://www.cs.uni-paderborn.de/?id=maxinet',
@@ -31,17 +31,19 @@ setup(name='MaxiNet',
 if((__name__=="__main__") and (sys.argv[1] == "install")):
     # We need to make package_data files executable...
     # Ugly hack:
-    fn = os.tempnam() # need file in different folder as local subfolder MaxiNet would be used otherwise
+    import tempfile
+    new_file, fn = tempfile.mkstemp()
+    #fn = os.tempnam() # need file in different folder as local subfolder MaxiNet would be used otherwise
     f = open(fn,"w")
     f.write("""
 import os,subprocess
-print "Setting executable bits..."
+print ("Setting executable bits...")
 from MaxiNet.tools import Tools
 d = Tools.get_script_dir()
 for f in filter(lambda x: x[-3:]==".sh",os.listdir(d)):
-    print f
+    print (f)
     subprocess.call(["sudo","chmod","a+x",d+f])
 """)
     f.close()
-    subprocess.call(["python",fn])
+    subprocess.call(["python3",fn])
     os.remove(fn)
