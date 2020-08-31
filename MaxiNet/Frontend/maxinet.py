@@ -333,8 +333,8 @@ class Worker(object):
         if self.ip(classifier="backend") is None:
             logger.warn("no ip configured - can not fix MTU ")
             return 0
-        intf = self.run_cmd("ip addr show to " + self.ip(classifier="backend") +
-                            "/24 | head -n1 | cut -d' ' -f2 | tr -d :").strip()
+        intf = self.run_cmd("ip addr show to " + self.ip(classifier="backend").decode("utf-8") +
+                            "/24 | head -n1 | cut -d' ' -f2 | tr -d :").decode("utf-8").strip()
         if intf == "":
             logger.warn("could not find eth device - can not fix MTU")
             return 0
@@ -628,8 +628,8 @@ class Cluster(object):
         if (myIP.strip() == "local"):
             myIP = "127.0.0.1"
         else:
-            myIP = subprocess.check_output("ip route get %s" % ip, shell=True).split("src")[1].split()[0]
-
+            myIP = subprocess.check_output("ip route get %s" % ip, shell=True).split(b"src")[1].split()[0]
+        myIP = myIP.decode("utf-8")
         self._pyrodaemon = Pyro4.Daemon(host=myIP)
         self._pyrodaemon._pyroHmacKey=password
         uri = self._pyrodaemon.register(self)

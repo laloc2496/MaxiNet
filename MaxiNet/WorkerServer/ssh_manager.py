@@ -13,6 +13,8 @@ class SSH_Manager(object):
         self.popen = None
         subprocess.call(["chown", ":%s" % user, folder])
         subprocess.call(["chmod", "g+xr", folder])
+        print(ip)
+
         if not self._folder_is_initialized():
             self.initialize_ssh_folder(ip, port, user)
 
@@ -30,7 +32,7 @@ class SSH_Manager(object):
                                                        + "sshd_config.template")
         with open(template, "r") as f_template:
             content = f_template.read()
-        content = content.replace("<!IP!>", ip)
+        content = content.replace("<!IP!>", ip.decode("utf-8"))
         content = content.replace("<!USER!>", user)
         content = content.replace("<!PORT!>", str(port))
         content = content.replace("<!FOLDER!>", self.folder)
@@ -83,7 +85,7 @@ class SSH_Manager(object):
         #kill the process that might listen on MaxiNets sshd port:
         r = subprocess.call(["sudo", "fuser", "-k", "-n", "tcp", "%s" % self.port])
         if(r == 0):
-            print "Killed a process that listened on port %s in order to start MaxiNets sshd." % self.port
+            print ("Killed a process that listened on port %s in order to start MaxiNets sshd." % self.port)
         self.popen = subprocess.Popen(["/usr/sbin/sshd", "-D",
                                        "-f",
                                        os.path.join(self.folder, "sshd_config")

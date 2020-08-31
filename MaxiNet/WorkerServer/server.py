@@ -67,7 +67,7 @@ class WorkerServer(object):
     def exit_handler(self, signal, frame):
         # I have absolutely no clue why but without this print atexit sometimes
         # doesn't seem to wait for called functions to finish...
-        print "exiting..."
+        print ("exiting...")
         self._shutdown = True
         sys.exit()
 
@@ -82,7 +82,7 @@ class WorkerServer(object):
             except:
                 if self._ip != None:
                     #self.ip as an indicator that this worker was connected to the frontend once.
-                    print "Trying to reconnect to FrontendServer..."
+                    print ("Trying to reconnect to FrontendServer...")
                     try:
                         try:
                             self._pyrodaemon.unregister(self)
@@ -127,7 +127,7 @@ class WorkerServer(object):
         self._ns = None
         while not self._ns:
             try:
-                self._ns = Pyro4.locateNS(ip, port, hmac_key=password)
+                self._ns = Pyro4.locateNS(ip.decode("utf-8"), port, hmac_key=password)
             except Pyro4.errors.NamingError:
                 if tries < retry:
                     self.logger.warn("Unable to locate Nameserver. Trying again in 5 seconds...")
@@ -149,7 +149,7 @@ class WorkerServer(object):
         self.logger.info("configuring and starting ssh daemon...")
         self.sshManager = SSH_Manager(folder=self.ssh_folder, ip=self.ip, port=self.config.get_sshd_port(), user=self.config.get("all", "sshuser"))
         self.sshManager.start_sshd()
-        self._pyrodaemon = Pyro4.Daemon(host=self.ip)
+        self._pyrodaemon = Pyro4.Daemon(host=self.ip.decode("utf-8"))
         self._pyrodaemon._pyroHmacKey=password
         uri = self._pyrodaemon.register(self)
         self._ns.register(self._get_pyroname(), uri)
@@ -310,7 +310,7 @@ class MininetManager(object):
             else:
                 self.net = Mininet(topo=topo, intf=TCIntf, link=TCLinkParams,
                                    switch=switch)
-        except Exception, e:
+        except Exception as e:
             self.logger.error("Failed to create mininet instance: %s" % traceback.format_exc())
             raise e
         if STT:
@@ -428,9 +428,9 @@ def getFrontendStatus():
     if(manager_uri):
         manager = Pyro4.Proxy(manager_uri)
         manager._pyroHmacKey=pw
-        print manager.print_worker_status()
+        print (manager.print_worker_status())
     else:
-        print "Could not contact Frontend server at %s:%s" % (ip, port)
+        print ("Could not contact Frontend server at %s:%s" % (ip, port))
 
 
 def main():
@@ -463,18 +463,18 @@ def main():
         pw = parsed.password
 
     if os.getuid() != 0:
-        print "MaxiNetWorker must run with root privileges!"
+        print ("MaxiNetWorker must run with root privileges!")
         sys.exit(1)
-
+    print("GET IP: " + str(ip))
     if not (ip and port and pw):
-        print "Please provide MaxiNet.cfg or specify ip, port and password of \
-               the Frontend Server."
+        print ("Please provide MaxiNet.cfg or specify ip, port and password of \
+               the Frontend Server.")
     else:
         workerserver = WorkerServer()
 
         signal.signal(signal.SIGINT, workerserver.exit_handler)
 
-        workerserver.start(ip=ip, port=port, password=pw)
+        workerserver.start(ip=ip.encode("utf-8"), port=port, password=pw.encode("utf-8"))
         workerserver.monitorFrontend()
 
 

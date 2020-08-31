@@ -15,9 +15,10 @@ fi
 
 if [ "$1" == "-a" ]
 then
-    mininet="y"
+    mininet="n"
     metis="y"
     pyro="y"
+    containernet="n"
 else
     read -n1 -r -p "Do you want to install MaxiNet with Docker container support? (y/[n])" containernet
     if [ "$containernet" == "y" ] || [ "$containernet" == "Y" ]

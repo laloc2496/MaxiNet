@@ -13,6 +13,7 @@ import logging
 import os
 import subprocess
 import warnings
+import tempfile
 
 from mininet.topo import Topo
 
@@ -207,7 +208,7 @@ class Partitioner(object):
         self.partitions = []
         for i in range(0, max(mapping.values()) + 1):
             self.partitions.append(Topo())
-        print mapping
+        print (mapping)
         switch_to_part = {}
         for switch in self.switches:
             if(not switch in mapping):
@@ -221,7 +222,7 @@ class Partitioner(object):
     def _write_to_file(self, pstr):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            filename = os.tempnam()
+            new_file, filename = tempfile.mkstemp()
         self.logger.debug("metis file: " + filename)
         self.logger.debug(pstr)
         f = open(filename, "w")

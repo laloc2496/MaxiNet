@@ -1,5 +1,5 @@
 import atexit
-from ConfigParser import RawConfigParser
+from configparser import RawConfigParser
 from mininet.topo import Topo
 import logging
 import os
@@ -76,19 +76,32 @@ class MaxiNetConfig(RawConfigParser):
     @Pyro4.expose
     def run_with_1500_mtu(self):
         if(self.has_option("all","runWith1500MTU")):
-            return self.getboolean("all","runWith1500MTU")
+            
+            runwith1500MTU = self.get("all","runWith1500MTU")
+            if runwith1500MTU == "False":
+                return False
+            else:
+                return True
         return False
 
     @Pyro4.expose
     def use_stt_tunneling(self):
         if(self.has_option("all","useSTT")):
-            return self.getboolean("all","useSTT")
+            useSTT = self.get("all","useSTT")
+            if useSTT == "False":
+                return False
+            else:
+                return True
         return False
 
     @Pyro4.expose
     def deactivateTSO(self):
         if(self.has_option("all","deactivateTSO")):
-            return self.getboolean("all","deactivateTSO")
+            deactivateTSO = self.get("all","deactivateTSO")
+            if deactivateTSO == "False":
+                return False
+            else:
+                return True
         return False
 
     @Pyro4.expose
@@ -150,7 +163,7 @@ class MaxiNetConfig(RawConfigParser):
 
     @Pyro4.expose
     def getint(self, section, option):
-        return RawConfigParser.getint(self, section, option)
+        return int(RawConfigParser.get(self, section, option))
 
     @Pyro4.expose
     def getboolean(self, section, option):
@@ -285,7 +298,7 @@ class SSH_Tool(object):
         with open(self.known_hosts, "a") as kh:
             fp = subprocess.check_output(["ssh-keyscan", "-p",
                                           str(self.config.get_sshd_port()), ip])
-            kh.write(fp)
+            kh.write(fp.decode("utf-8"))
 
     def _cleanup(self):
         subprocess.call(["rm", self.key_priv])
@@ -383,5 +396,5 @@ class Tools(object):
 
     @staticmethod
     def guess_ip():
-        ip = subprocess.check_output("ifconfig -a | awk '/(cast)/ { print $2 }' | cut -d':' -f2 | head -1", shell=True)
+        ip = subprocess.check_output("ifconfig -a | awk '/(cast)/ { print ($2) }' | cut -d':' -f2 | head -1", shell=True)
         return ip.strip()
